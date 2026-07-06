@@ -2,10 +2,12 @@ package com.smartlostfound.backend.service;
 
 import com.smartlostfound.backend.entity.User;
 import com.smartlostfound.backend.exception.EmailAlreadyExistsException;
+import com.smartlostfound.backend.exception.InvalidCredentialsException;
 import com.smartlostfound.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.smartlostfound.backend.security.JwtService;
 
 @Service
 public class UserService {
@@ -15,6 +17,9 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtService jwtService;
 
     public User registerUser(User user) {
 
@@ -26,5 +31,17 @@ public class UserService {
         user.setRole("USER");
 
         return userRepository.save(user);
+    }
+
+    public String loginUser(String email, String password) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new InvalidCredentialsException("Invalid email or password");
+        }
+
+        return jwtService.generateToken(user.getEmail());
     }
 }

@@ -6,6 +6,8 @@ import com.smartlostfound.backend.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import com.smartlostfound.backend.dto.LoginRequest;
+import com.smartlostfound.backend.dto.LoginResponse;
 
 @RestController
 @RequestMapping("/api/users")
@@ -25,5 +27,16 @@ public class UserController {
         user.setPhone(request.getPhone());
 
         return userService.registerUser(user);
+    }
+
+    @PostMapping("/login")
+    public LoginResponse login(@Valid @RequestBody LoginRequest request) {
+
+        String token = userService.loginUser(
+                request.getEmail(),
+                request.getPassword()
+        );
+
+        return new LoginResponse(token, "Login successful");
     }
 }
