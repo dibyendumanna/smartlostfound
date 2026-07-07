@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("/api/lost-items")
@@ -55,5 +56,15 @@ public class LostItemController {
                 request,
                 authentication.getName()
         );
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteLostItem(
+            @PathVariable Long id,
+            Authentication authentication) {
+
+        lostItemService.deleteLostItem(id, authentication.getName());
+
+        return ResponseEntity.ok("Lost item deleted successfully");
     }
 }

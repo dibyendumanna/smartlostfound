@@ -112,4 +112,18 @@ public class LostItemService {
 
         return mapToResponse(updatedItem);
     }
+
+    public void deleteLostItem(Long id, String email) {
+
+        LostItem lostItem = lostItemRepository.findById(id)
+                .orElseThrow(() ->
+                        new LostItemNotFoundException("Lost item not found"));
+
+        if (!lostItem.getUser().getEmail().equals(email)) {
+            throw new AccessDeniedException(
+                    "You can delete only your own lost items");
+        }
+
+        lostItemRepository.delete(lostItem);
+    }
 }
