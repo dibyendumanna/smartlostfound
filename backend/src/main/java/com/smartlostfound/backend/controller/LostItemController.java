@@ -37,4 +37,10 @@ public class LostItemController {
 
         return lostItemService.getMyLostItems(authentication.getName());
     }
+
+    @GetMapping("/{id}")
+    public LostItemResponse getLostItemById(@PathVariable Long id) {
+
+        return lostItemService.getLostItemById(id);
+    }
 }

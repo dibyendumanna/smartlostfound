@@ -44,4 +44,14 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler(LostItemNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleLostItemNotFound(
+            LostItemNotFoundException ex) {
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
 }

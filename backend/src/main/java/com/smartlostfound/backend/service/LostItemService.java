@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.smartlostfound.backend.dto.LostItemResponse;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.smartlostfound.backend.exception.LostItemNotFoundException;
 
 @Service
 public class LostItemService {
@@ -57,6 +58,15 @@ public class LostItemService {
                 .stream()
                 .map(this::mapToResponse)
                 .toList();
+    }
+
+    public LostItemResponse getLostItemById(Long id) {
+
+        LostItem lostItem = lostItemRepository.findById(id)
+                .orElseThrow(() ->
+                        new LostItemNotFoundException("Lost item not found"));
+
+        return mapToResponse(lostItem);
     }
 
     private LostItemResponse mapToResponse(LostItem lostItem) {
