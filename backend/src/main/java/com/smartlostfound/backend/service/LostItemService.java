@@ -7,6 +7,9 @@ import com.smartlostfound.backend.repository.LostItemRepository;
 import com.smartlostfound.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.smartlostfound.backend.dto.LostItemResponse;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class LostItemService {
@@ -17,7 +20,7 @@ public class LostItemService {
     @Autowired
     private UserRepository userRepository;
 
-    public LostItem createLostItem(LostItemRequest request, String email) {
+    public LostItemResponse createLostItem(LostItemRequest request, String email) {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -32,6 +35,43 @@ public class LostItemService {
         lostItem.setImageUrl(request.getImageUrl());
         lostItem.setUser(user);
 
-        return lostItemRepository.save(lostItem);
+        LostItem savedItem = lostItemRepository.save(lostItem);
+
+        return mapToResponse(savedItem);
+    }
+
+    public List<LostItemResponse> getAllLostItems() {
+
+        return lostItemRepository.findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<LostItemResponse> getMyLostItems(String email) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return lostItemRepository.findByUser(user)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    private LostItemResponse mapToResponse(LostItem lostItem) {
+
+        LostItemResponse response = new LostItemResponse();
+
+        response.setId(lostItem.getId());
+        response.setItemName(lostItem.getItemName());
+        response.setDescription(lostItem.getDescription());
+        response.setCategory(lostItem.getCategory());
+        response.setLocation(lostItem.getLocation());
+        response.setLostDate(lostItem.getLostDate());
+        response.setImageUrl(lostItem.getImageUrl());
+        response.setReportedBy(lostItem.getUser().getEmail());
+
+        return response;
     }
 }
