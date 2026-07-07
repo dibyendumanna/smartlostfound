@@ -11,6 +11,7 @@ import com.smartlostfound.backend.dto.LostItemResponse;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.smartlostfound.backend.exception.LostItemNotFoundException;
+import com.smartlostfound.backend.exception.AccessDeniedException;
 
 @Service
 public class LostItemService {
@@ -83,5 +84,32 @@ public class LostItemService {
         response.setReportedBy(lostItem.getUser().getEmail());
 
         return response;
+    }
+
+    public LostItemResponse updateLostItem(
+            Long id,
+            LostItemRequest request,
+            String email) {
+
+        LostItem lostItem = lostItemRepository.findById(id)
+                .orElseThrow(() ->
+                        new LostItemNotFoundException("Lost item not found"));
+
+        // Check ownership
+        if (!lostItem.getUser().getEmail().equals(email)) {
+            throw new AccessDeniedException(
+                    "You can update only your own lost items");
+        }
+
+        lostItem.setItemName(request.getItemName());
+        lostItem.setDescription(request.getDescription());
+        lostItem.setCategory(request.getCategory());
+        lostItem.setLocation(request.getLocation());
+        lostItem.setLostDate(request.getLostDate());
+        lostItem.setImageUrl(request.getImageUrl());
+
+        LostItem updatedItem = lostItemRepository.save(lostItem);
+
+        return mapToResponse(updatedItem);
     }
 }

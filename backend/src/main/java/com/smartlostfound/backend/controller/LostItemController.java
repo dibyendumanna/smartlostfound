@@ -43,4 +43,17 @@ public class LostItemController {
 
         return lostItemService.getLostItemById(id);
     }
+
+    @PutMapping("/{id}")
+    public LostItemResponse updateLostItem(
+            @PathVariable Long id,
+            @Valid @RequestBody LostItemRequest request,
+            Authentication authentication) {
+
+        return lostItemService.updateLostItem(
+                id,
+                request,
+                authentication.getName()
+        );
+    }
 }
