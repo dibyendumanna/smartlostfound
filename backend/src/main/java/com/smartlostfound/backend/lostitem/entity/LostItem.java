@@ -1,5 +1,6 @@
-package com.smartlostfound.backend.entity;
+package com.smartlostfound.backend.lostitem.entity;
 
+import com.smartlostfound.backend.entity.User;
 import jakarta.persistence.*;
 import lombok.Data;
 

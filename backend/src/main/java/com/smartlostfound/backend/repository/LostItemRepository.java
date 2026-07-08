@@ -1,6 +1,6 @@
 package com.smartlostfound.backend.repository;
 
-import com.smartlostfound.backend.entity.LostItem;
+import com.smartlostfound.backend.lostitem.entity.LostItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import com.smartlostfound.backend.entity.User;

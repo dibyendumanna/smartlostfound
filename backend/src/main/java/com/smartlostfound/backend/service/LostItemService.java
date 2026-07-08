@@ -1,7 +1,7 @@
 package com.smartlostfound.backend.service;
 
 import com.smartlostfound.backend.dto.LostItemRequest;
-import com.smartlostfound.backend.entity.LostItem;
+import com.smartlostfound.backend.lostitem.entity.LostItem;
 import com.smartlostfound.backend.entity.User;
 import com.smartlostfound.backend.repository.LostItemRepository;
 import com.smartlostfound.backend.repository.UserRepository;
