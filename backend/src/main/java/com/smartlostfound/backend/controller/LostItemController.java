@@ -14,8 +14,11 @@ import org.springframework.http.ResponseEntity;
 @RequestMapping("/api/lost-items")
 public class LostItemController {
 
-    @Autowired
-    private LostItemService lostItemService;
+    private final LostItemService lostItemService;
+
+    public LostItemController(LostItemService lostItemService) {
+        this.lostItemService = lostItemService;
+    }
 
     @PostMapping
     public LostItemResponse createLostItem(

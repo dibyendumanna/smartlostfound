@@ -10,17 +10,19 @@ import org.springframework.stereotype.Service;
 import com.smartlostfound.backend.dto.LostItemResponse;
 import java.util.List;
 import java.util.stream.Collectors;
-import com.smartlostfound.backend.exception.LostItemNotFoundException;
+import com.smartlostfound.backend.exception.ResourceNotFoundException;
 import com.smartlostfound.backend.exception.AccessDeniedException;
 
 @Service
 public class LostItemService {
 
-    @Autowired
-    private LostItemRepository lostItemRepository;
+    private final LostItemRepository lostItemRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+    public LostItemService(LostItemRepository lostItemRepository, UserRepository userRepository) {
+        this.lostItemRepository = lostItemRepository;
+        this.userRepository = userRepository;
+    }
 
     public LostItemResponse createLostItem(LostItemRequest request, String email) {
 
@@ -65,7 +67,7 @@ public class LostItemService {
 
         LostItem lostItem = lostItemRepository.findById(id)
                 .orElseThrow(() ->
-                        new LostItemNotFoundException("Lost item not found"));
+                        new ResourceNotFoundException("Lost item not found"));
 
         return mapToResponse(lostItem);
     }
@@ -93,7 +95,7 @@ public class LostItemService {
 
         LostItem lostItem = lostItemRepository.findById(id)
                 .orElseThrow(() ->
-                        new LostItemNotFoundException("Lost item not found"));
+                        new ResourceNotFoundException("Lost item not found"));
 
         // Check ownership
         if (!lostItem.getUser().getEmail().equals(email)) {
@@ -117,7 +119,7 @@ public class LostItemService {
 
         LostItem lostItem = lostItemRepository.findById(id)
                 .orElseThrow(() ->
-                        new LostItemNotFoundException("Lost item not found"));
+                        new ResourceNotFoundException("Lost item not found"));
 
         if (!lostItem.getUser().getEmail().equals(email)) {
             throw new AccessDeniedException(

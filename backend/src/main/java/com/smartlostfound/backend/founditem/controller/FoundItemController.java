@@ -15,8 +15,11 @@ import java.util.List;
 @RequestMapping("/api/found-items")
 public class FoundItemController {
 
-    @Autowired
-    private FoundItemService foundItemService;
+    private final FoundItemService foundItemService;
+
+    public FoundItemController(FoundItemService foundItemService) {
+        this.foundItemService = foundItemService;
+    }
 
     @PostMapping
     public FoundItemResponse createFoundItem(

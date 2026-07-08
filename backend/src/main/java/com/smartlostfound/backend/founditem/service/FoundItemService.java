@@ -9,18 +9,20 @@ import com.smartlostfound.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.smartlostfound.backend.exception.AccessDeniedException;
-import com.smartlostfound.backend.exception.LostItemNotFoundException;
+import com.smartlostfound.backend.exception.ResourceNotFoundException;
 
 import java.util.List;
 
 @Service
 public class FoundItemService {
 
-    @Autowired
-    private FoundItemRepository foundItemRepository;
+    private final FoundItemRepository foundItemRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+    public FoundItemService(FoundItemRepository foundItemRepository, UserRepository userRepository) {
+        this.foundItemRepository = foundItemRepository;
+        this.userRepository = userRepository;
+    }
 
     private FoundItemResponse mapToResponse(FoundItem foundItem) {
 
@@ -83,7 +85,7 @@ public class FoundItemService {
 
         FoundItem foundItem = foundItemRepository.findById(id)
                 .orElseThrow(() ->
-                        new LostItemNotFoundException("Found item not found"));
+                        new ResourceNotFoundException("Found item not found"));
 
         return mapToResponse(foundItem);
     }
@@ -95,7 +97,7 @@ public class FoundItemService {
 
         FoundItem foundItem = foundItemRepository.findById(id)
                 .orElseThrow(() ->
-                        new LostItemNotFoundException("Found item not found"));
+                        new ResourceNotFoundException("Found item not found"));
 
         if (!foundItem.getUser().getEmail().equals(email)) {
             throw new AccessDeniedException(
@@ -116,7 +118,7 @@ public class FoundItemService {
 
         FoundItem foundItem = foundItemRepository.findById(id)
                 .orElseThrow(() ->
-                        new LostItemNotFoundException("Found item not found"));
+                        new ResourceNotFoundException("Found item not found"));
 
         if (!foundItem.getUser().getEmail().equals(email)) {
             throw new AccessDeniedException(
