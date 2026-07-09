@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import com.smartlostfound.backend.dto.LostItemFormRequest;
 
 @RestController
 @RequestMapping("/api/lost-items")
@@ -20,14 +21,15 @@ public class LostItemController {
         this.lostItemService = lostItemService;
     }
 
-    @PostMapping
+    @PostMapping(consumes = {"multipart/form-data"})
     public LostItemResponse createLostItem(
-            @Valid @RequestBody LostItemRequest request,
+            @Valid @ModelAttribute LostItemFormRequest request,
             Authentication authentication) {
 
-        String email = authentication.getName();
-
-        return lostItemService.createLostItem(request, email);
+        return lostItemService.createLostItem(
+                request,
+                authentication.getName()
+        );
     }
 
     @GetMapping

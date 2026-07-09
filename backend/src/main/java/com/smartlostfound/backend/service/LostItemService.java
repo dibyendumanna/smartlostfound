@@ -12,22 +12,42 @@ import java.util.List;
 import java.util.stream.Collectors;
 import com.smartlostfound.backend.exception.ResourceNotFoundException;
 import com.smartlostfound.backend.exception.AccessDeniedException;
+import com.smartlostfound.backend.dto.LostItemFormRequest;
+import com.smartlostfound.backend.file.service.FileStorageService;
 
 @Service
 public class LostItemService {
 
+    private final FileStorageService fileStorageService;
     private final LostItemRepository lostItemRepository;
     private final UserRepository userRepository;
 
-    public LostItemService(LostItemRepository lostItemRepository, UserRepository userRepository) {
+    public LostItemService(
+            LostItemRepository lostItemRepository,
+            UserRepository userRepository,
+            FileStorageService fileStorageService) {
+
         this.lostItemRepository = lostItemRepository;
         this.userRepository = userRepository;
+        this.fileStorageService = fileStorageService;
     }
 
-    public LostItemResponse createLostItem(LostItemRequest request, String email) {
+    public LostItemResponse createLostItem(
+            LostItemFormRequest request,
+            String email) {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        String imageFileName = null;
+
+        if (request.getImage() != null && !request.getImage().isEmpty()) {
+            try {
+                imageFileName = fileStorageService.saveFile(request.getImage());
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to upload image");
+            }
+        }
 
         LostItem lostItem = new LostItem();
 
@@ -36,7 +56,7 @@ public class LostItemService {
         lostItem.setCategory(request.getCategory());
         lostItem.setLocation(request.getLocation());
         lostItem.setLostDate(request.getLostDate());
-        lostItem.setImageUrl(request.getImageUrl());
+        lostItem.setImageUrl(imageFileName);
         lostItem.setUser(user);
 
         LostItem savedItem = lostItemRepository.save(lostItem);
