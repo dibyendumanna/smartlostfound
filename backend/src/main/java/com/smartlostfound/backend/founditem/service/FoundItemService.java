@@ -1,12 +1,13 @@
 package com.smartlostfound.backend.founditem.service;
 
+import com.smartlostfound.backend.dto.FoundItemFormRequest;
 import com.smartlostfound.backend.entity.User;
+import com.smartlostfound.backend.file.service.FileStorageService;
 import com.smartlostfound.backend.founditem.dto.FoundItemRequest;
 import com.smartlostfound.backend.founditem.dto.FoundItemResponse;
 import com.smartlostfound.backend.founditem.entity.FoundItem;
 import com.smartlostfound.backend.founditem.repository.FoundItemRepository;
 import com.smartlostfound.backend.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.smartlostfound.backend.exception.AccessDeniedException;
 import com.smartlostfound.backend.exception.ResourceNotFoundException;
@@ -18,10 +19,12 @@ public class FoundItemService {
 
     private final FoundItemRepository foundItemRepository;
     private final UserRepository userRepository;
+    private final FileStorageService fileStorageService;
 
-    public FoundItemService(FoundItemRepository foundItemRepository, UserRepository userRepository) {
+    public FoundItemService(FoundItemRepository foundItemRepository, UserRepository userRepository, FileStorageService fileStorageService) {
         this.foundItemRepository = foundItemRepository;
         this.userRepository = userRepository;
+        this.fileStorageService = fileStorageService;
     }
 
     private FoundItemResponse mapToResponse(FoundItem foundItem) {
@@ -41,11 +44,23 @@ public class FoundItemService {
     }
 
     public FoundItemResponse createFoundItem(
-            FoundItemRequest request,
+            FoundItemFormRequest request,
             String email) {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        String imageFileName = null;
+
+        if (request.getImage() != null && !request.getImage().isEmpty()) {
+
+            try {
+                imageFileName = fileStorageService.saveFile(request.getImage());
+
+            } catch (Exception e) {
+
+                throw new RuntimeException("Failed to upload image");
+            }
+        }
 
         FoundItem foundItem = new FoundItem();
 
@@ -54,7 +69,7 @@ public class FoundItemService {
         foundItem.setCategory(request.getCategory());
         foundItem.setLocation(request.getLocation());
         foundItem.setFoundDate(request.getFoundDate());
-        foundItem.setImageUrl(request.getImageUrl());
+        foundItem.setImageUrl(imageFileName);
         foundItem.setUser(user);
 
         FoundItem savedItem = foundItemRepository.save(foundItem);
@@ -92,7 +107,7 @@ public class FoundItemService {
 
     public FoundItemResponse updateFoundItem(
             Long id,
-            FoundItemRequest request,
+            FoundItemFormRequest request,
             String email) {
 
         FoundItem foundItem = foundItemRepository.findById(id)
@@ -109,7 +124,7 @@ public class FoundItemService {
         foundItem.setCategory(request.getCategory());
         foundItem.setLocation(request.getLocation());
         foundItem.setFoundDate(request.getFoundDate());
-        foundItem.setImageUrl(request.getImageUrl());
+//        foundItem.setImageUrl(request.getImageUrl());
 
         return mapToResponse(foundItemRepository.save(foundItem));
     }

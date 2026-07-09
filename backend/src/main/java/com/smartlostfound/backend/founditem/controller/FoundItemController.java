@@ -1,5 +1,6 @@
 package com.smartlostfound.backend.founditem.controller;
 
+import com.smartlostfound.backend.dto.FoundItemFormRequest;
 import com.smartlostfound.backend.founditem.dto.FoundItemRequest;
 import com.smartlostfound.backend.founditem.dto.FoundItemResponse;
 import com.smartlostfound.backend.founditem.service.FoundItemService;
@@ -21,9 +22,9 @@ public class FoundItemController {
         this.foundItemService = foundItemService;
     }
 
-    @PostMapping
+    @PostMapping(consumes = {"multipart/form-data"})
     public FoundItemResponse createFoundItem(
-            @Valid @RequestBody FoundItemRequest request,
+            @Valid @ModelAttribute FoundItemFormRequest request,
             Authentication authentication) {
 
         return foundItemService.createFoundItem(
@@ -56,7 +57,7 @@ public class FoundItemController {
     @PutMapping("/{id}")
     public FoundItemResponse updateFoundItem(
             @PathVariable Long id,
-            @Valid @RequestBody FoundItemRequest request,
+            @Valid @ModelAttribute FoundItemFormRequest request,
             Authentication authentication) {
 
         return foundItemService.updateFoundItem(
