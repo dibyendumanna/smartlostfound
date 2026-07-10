@@ -8,6 +8,7 @@ import com.smartlostfound.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.smartlostfound.backend.dto.LostItemResponse;
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.smartlostfound.backend.exception.ResourceNotFoundException;
@@ -34,7 +35,7 @@ public class LostItemService {
 
     public LostItemResponse createLostItem(
             LostItemFormRequest request,
-            String email) {
+            String email) throws IOException {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -42,10 +43,12 @@ public class LostItemService {
         String imageFileName = null;
 
         if (request.getImage() != null && !request.getImage().isEmpty()) {
+
             try {
                 imageFileName = fileStorageService.saveFile(request.getImage());
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to upload image");
+
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to save image", e);
             }
         }
 
@@ -110,7 +113,7 @@ public class LostItemService {
 
     public LostItemResponse updateLostItem(
             Long id,
-            LostItemRequest request,
+            LostItemFormRequest request,
             String email) {
 
         LostItem lostItem = lostItemRepository.findById(id)
@@ -128,7 +131,23 @@ public class LostItemService {
         lostItem.setCategory(request.getCategory());
         lostItem.setLocation(request.getLocation());
         lostItem.setLostDate(request.getLostDate());
-        lostItem.setImageUrl(request.getImageUrl());
+
+// Handle image replacement
+        if (request.getImage() != null && !request.getImage().isEmpty()) {
+
+            // Delete old image
+            fileStorageService.deleteFile(lostItem.getImageUrl());
+
+            try {
+                String newImage =
+                        fileStorageService.saveFile(request.getImage());
+
+                lostItem.setImageUrl(newImage);
+
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to save image", e);
+            }
+        }
 
         LostItem updatedItem = lostItemRepository.save(lostItem);
 
@@ -146,6 +165,10 @@ public class LostItemService {
                     "You can delete only your own lost items");
         }
 
+        // Delete image from uploads folder
+        fileStorageService.deleteFile(lostItem.getImageUrl());
+
+        // Delete database record
         lostItemRepository.delete(lostItem);
     }
 }

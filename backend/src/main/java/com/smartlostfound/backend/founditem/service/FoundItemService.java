@@ -11,7 +11,7 @@ import com.smartlostfound.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import com.smartlostfound.backend.exception.AccessDeniedException;
 import com.smartlostfound.backend.exception.ResourceNotFoundException;
-
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -56,9 +56,8 @@ public class FoundItemService {
             try {
                 imageFileName = fileStorageService.saveFile(request.getImage());
 
-            } catch (Exception e) {
-
-                throw new RuntimeException("Failed to upload image");
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to save image", e);
             }
         }
 
@@ -139,6 +138,7 @@ public class FoundItemService {
             throw new AccessDeniedException(
                     "You can delete only your own found items");
         }
+        fileStorageService.deleteFile(foundItem.getImageUrl());
 
         foundItemRepository.delete(foundItem);
     }

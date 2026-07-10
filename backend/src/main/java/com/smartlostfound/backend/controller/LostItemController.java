@@ -7,6 +7,8 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import com.smartlostfound.backend.dto.LostItemFormRequest;
@@ -24,7 +26,7 @@ public class LostItemController {
     @PostMapping(consumes = {"multipart/form-data"})
     public LostItemResponse createLostItem(
             @Valid @ModelAttribute LostItemFormRequest request,
-            Authentication authentication) {
+            Authentication authentication) throws IOException {
 
         return lostItemService.createLostItem(
                 request,
@@ -53,7 +55,7 @@ public class LostItemController {
     @PutMapping("/{id}")
     public LostItemResponse updateLostItem(
             @PathVariable Long id,
-            @Valid @RequestBody LostItemRequest request,
+            @Valid @ModelAttribute LostItemFormRequest request,
             Authentication authentication) {
 
         return lostItemService.updateLostItem(
